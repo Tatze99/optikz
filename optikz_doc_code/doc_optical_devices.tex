@@ -1,0 +1,82 @@
+\begin{tikzpicture}
+    
+    \foreach\x in {2,4,6,8,10,12}\draw[thick, -{latex}] (-.7,\x) -- (0,\x);
+
+    \begin{scope}[shift={(0,12)}]
+    \camera[name=name] at (0,0);
+    \camera[angle=45] at (2.5,0); 
+    \camera[width=0.6] at (5,0);
+    \camera[thickness=0.8] at (7.5,0);
+    \camera[color=green] at (10,0);
+    % \camera[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+    
+    \begin{scope}[shift={(0,10)}]
+    \spectrometer[name=name] at (0,0);
+    \spectrometer[angle=45] at (2.5,0); 
+    \spectrometer[width=0.6] at (5,0);
+    \spectrometer[thickness=0.8] at (7.5,0);
+    \spectrometer[color=green] at (10,0);
+    % \spectrometer[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+    
+    \begin{scope}[shift={(0,8)}]
+    \objective[name=name] at (0,0);
+    \objective[angle=45] at (2.5,0); 
+    \objective[width=0.6] at (5,0);
+    \objective[thickness=0.8] at (7.5,0);
+    \objective[color=green] at (10,0);
+    % \objective[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+    
+    \begin{scope}[shift={(0,6)}]
+    \diode[name=name] at (0,0);
+    \diode[angle=45] at (2.5,0); 
+    \diode[width=0.6] at (5,0);
+    \diode[thickness=0.8] at (7.5,0);
+    \diode[color=green] at (10,0);
+    % \diode[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+
+    \begin{scope}[shift={(0,4)}]
+    \pockelscell[name=name] at (0,0);
+    \pockelscell[angle=45] at (2.5,0); 
+    \pockelscell[width=0.6] at (5,0);
+    \pockelscell[thickness=0.8] at (7.5,0);
+    \pockelscell[color=green] at (10,0);
+    % \pockelscell[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+
+    \begin{scope}[shift={(0,2)}]
+    \laser[name=name] at (0,0);
+    \laser[angle=45] at (2.5,0); 
+    \laser[width=0.6] at (5,0);
+    \laser[thickness=0.8] at (7.5,0);
+    \laser[color=green] at (10,0);
+    % \laser[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+
+    \begin{scope}[shift={(0,0)}]
+    \faradayrotator[name=name] at (0,0);
+    \faradayrotator[angle=45] at (2.5,0); 
+    \faradayrotator[width=0.6] at (5,0);
+    \faradayrotator[thickness=0.8] at (7.5,0);
+    \faradayrotator[color=green] at (10,0);
+    % \faradayrotator[angle=45, width=1.2, thickness=1.2, color=green] at (10,0); 
+    \end{scope}
+
+    \node[rotate=-50,anchor=west] (A) at (0,-1){\scriptsize\verb!\XXX[name=name] at (x,y);!};
+    \node[rotate=-50,anchor=west] (A) at (2.5,-1){\scriptsize\verb!\XXX[angle=45] at (x,y);!};
+    \node[rotate=-50,anchor=west] (A) at (5,-1){\scriptsize\verb!\XXX[width=0.6] at (x,y);!};
+    \node[rotate=-50,anchor=west] (A) at (7.5,-1){\scriptsize\verb!\XXX[thickness=0.8] at (x,y);!};
+    \node[rotate=-50,anchor=west] (A) at (10,-1){\scriptsize\verb!\XXX[color=green] at (x,y);!};
+
+    \node[anchor=west] (A) at (-4,12){\verb!\camera!};
+    \node[anchor=west] (A) at (-4,10){\verb!\spectrometer!};
+    \node[anchor=west] (A) at (-4,8){\verb!\objective!};
+    \node[anchor=west] (A) at (-4,6){\verb!\diode!};
+    \node[anchor=west] (A) at (-4,4){\verb!\pockelscell!};
+    \node[anchor=west] (A) at (-4,2){\verb!\laser!};
+    \node[anchor=west] (A) at (-4,0){\verb!\faradayrotator!};
+
+\end{tikzpicture}

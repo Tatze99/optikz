@@ -1,0 +1,27 @@
+\begin{tikzpicture}
+    \coordinate (A) at (1,1);
+    \coordinate (B) at (2,2);
+    \coordinate (C) at (2,0);
+    \coordinate (D) at (5,3);
+    \drawrainbow[0]{A}{B}{225}{45}
+    \drawrainbow{B}{C}{45}{-90}
+    \drawrainbow[0.8][1.2]{C}{D}{-90}{45}
+    \grating[angle=225] at (A);
+    \mirror[angle=45] at (B);
+    \mirror[angle=-90] at (C);
+    \mirror[angle=45, width=1.5] at (D);
+    
+    \begin{scope}[shift={(6,0)}]
+    \coordinate (A) at (1,1);
+    \coordinate (B) at (2,2);
+    \coordinate (C) at (2,0);
+    \coordinate (D) at (5,3);
+    \drawbeam[0.8][0.8][optikzred]{A}{B}{225}{45}
+    \drawbeam[0.8][0.8][optikzred]{B}{C}{45}{-90}
+    \drawbeam[0.8][1.2][optikzred]{C}{D}{-90}{45}
+    \mirror[angle=225] at (A);
+    \mirror[angle=45] at (B);
+    \mirror[angle=-90] at (C);
+    \mirror[angle=45, width=1.5] at (D);
+    \end{scope}
+\end{tikzpicture}

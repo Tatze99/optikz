@@ -1,0 +1,121 @@
+\begin{tikzpicture}
+    % \draw[step=1cm, opacity=0.1] (0,0) grid (10cm,10cm);
+
+    \begin{scope}[shift={(0,13.5)}]
+    \BScrystal at (0,0);
+    \BScrystal[angle=45] at (2,0); 
+    \BScrystal[width=0.6] at (4,0);
+    \BScrystal[thickness=0.6] at (6,0);
+    \BScrystal[color=green] at (8,0);
+    \BScrystal[angle=45, width=0.6, color=green] at (10,0); 
+    \end{scope}
+
+    \begin{scope}[shift={(0,12)}]
+    \mirror at (0,0);
+    \mirror[angle=45] at (2,0); 
+    \mirror[width=0.6] at (4,0);
+    \mirror[thickness=0.6] at (6,0);
+    \mirror[color=green] at (8,0);
+    \mirror[angle=45, width=0.6, color=green] at (10,0); 
+    \end{scope}
+ 
+    \begin{scope}[shift={(0,10.5)}]
+    \splitter at (0,0);
+    \splitter[angle=45] at (2,0); 
+    \splitter[width=0.6] at (4,0);
+    \splitter[thickness=0.6] at (6,0);
+    \splitter[color=green] at (8,0);
+    \splitter[angle=45, width=0.6, color=green] at (10,0);
+    \end{scope}
+
+    \begin{scope}[shift={(0,9)}]
+    \curvedmirror at (0,0);
+    \curvedmirror[angle=45] at (2,0); 
+    \curvedmirror[width=0.6] at (4,0);
+    \curvedmirror[thickness=0.6] at (6,0);
+    \curvedmirror[color=green] at (8,0);
+    \curvedmirror[angle=45, width=0.6, color=green] at (10,0); 
+    \end{scope}
+    
+    \begin{scope}[shift={(0,7.5)}]
+    \convexmirror at (0,0);
+    \convexmirror[angle=45] at (2,0); 
+    \convexmirror[width=0.6] at (4,0);
+    \convexmirror[thickness=0.6] at (6,0);
+    \convexmirror[color=green] at (8,0);
+    \convexmirror[angle=45, width=0.6, color=green] at (10,0); 
+    \end{scope}
+
+    \begin{scope}[shift={(0,6)}]
+    \concavelens at (0,0);
+    \concavelens[angle=45] at (2,0); 
+    \concavelens[width=0.6] at (4,0);
+    \concavelens[thickness=0.6] at (6,0);
+    \concavelens[color=green] at (8,0);
+    \concavelens[angle=45, width=0.6, color=green] at (10,0);
+    \end{scope}
+
+    \begin{scope}[shift={(0,4.5)}]
+    \convexlens at (0,0);
+    \convexlens[angle=45] at (2,0); 
+    \convexlens[width=0.6] at (4,0);
+    \convexlens[thickness=0.6] at (6,0);
+    \convexlens[color=green] at (8,0);
+    \convexlens[angle=45, width=0.6, color=green] at (10,0);
+    \end{scope}
+
+    \begin{scope}[shift={(0,3)}]
+    \planconvexlens at (0,0);
+    \planconvexlens[angle=45] at (2,0); 
+    \planconvexlens[width=0.6] at (4,0);
+    \planconvexlens[thickness=0.6] at (6,0);
+    \planconvexlens[color=green] at (8,0);
+    \planconvexlens[angle=45, width=0.6, color=green] at (10,0); 
+    \end{scope}
+
+    \begin{scope}[shift={(0,1.5)}]
+    \grating at (0,0);
+    \grating[angle=45] at (2,0); 
+    \grating[width=0.6] at (4,0);
+    \grating[thickness=0.6] at (6,0);
+    \grating[color=green] at (8,0);
+    \grating[angle=45, width=0.6, color=green] at (10,0);
+    \end{scope}
+
+    \begin{scope}[shift={(0,0)}]
+    \parabola at (0,0);
+    \parabola[angle=45] at (2,0); 
+    \parabola[width=0.6] at (4,0);
+    \parabola[thickness=0.6] at (6,0);
+    \parabola[color=green] at (8,0);
+    \parabola[angle=45, width=0.6, color=green] at (10,0);
+    \end{scope}
+
+
+    \foreach\x in {0,1.5,3,...,12}\draw[thick, -{latex}] (-.7,\x) -- (0,\x);
+
+    \node[rotate=-40,anchor=west] (A) at (0,-1){\tiny\verb!\XXX at (x,y);!};
+    \node[rotate=-40,anchor=west] (A) at (2,-1){\tiny\verb!\XXX[angle=45] at (x,y);!};
+    \node[rotate=-40,anchor=west] (A) at (4,-1){\tiny\verb!\XXX[width=0.6] at (x,y);!};
+    \node[rotate=-40,anchor=west] (A) at (6,-1){\tiny\verb!\XXX[thickness=0.6] at (x,y);!};
+    \node[rotate=-40,anchor=west] (A) at (8,-1){\tiny\verb!\XXX[color=green] at (x,y);!};
+    
+    \node at (0,15){\verb!standard!};
+    \node at (2,15){\verb!angle!};
+    \node at (4,15){\verb!width!};
+    \node at (6,15){\verb!thickness!};
+    \node at (8,15){\verb!color!};
+    % \node[rotate=-40,anchor=west] (A) at (10,-1){\tiny\verb!\XXX[angle=45, width=0.6, thickness=0.6, color=green] at (x,y);!};
+     
+    \node[anchor=west] (A) at (-5,13.5){\verb!\BScrystal!};
+    \node[anchor=west] (A) at (-5,12){\verb!\mirror!};
+    \node[anchor=west] (A) at (-5,10.5){\verb!\splitter!};
+    \node[anchor=west] (A) at (-5,9){\verb!\curvedmirror!};
+    \node[anchor=west] (A) at (-5,7.5){\verb!\convexmirror!};
+    \node[anchor=west] (A) at (-5,6.0){\verb!\concavelens!};
+    \node[anchor=west] (A) at (-5,4.5){\verb!\convexlens!};
+    \node[anchor=west] (A) at (-5,3.0){\verb!\planconvexlens!};
+    \node[anchor=west] (A) at (-5,1.5){\verb!\grating!};
+    \node[anchor=west] (A) at (-5,0){\verb!\parabola!};
+     
+  \end{tikzpicture}

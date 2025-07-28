@@ -1,0 +1,12 @@
+\begin{tikzpicture}
+\begin{scope}[shift={(1,-2)}]
+    \camera[name=camera, angle=180] at (0.3,0);
+    \spectrometer[name={spectro\\meter}, angle=180] at (2.6,0);
+    \objective[name={\scriptsize objective}, angle=180] at (4.3,0);
+    \pockelscell[name=pockels cell, angle=90+180, shift=0.8] at (5.55,.5);
+\end{scope}
+    \camera[name=camera] at (0,0);
+    \spectrometer[name={spectro\\meter}] at (2,0);
+    \objective[name={\scriptsize objective}] at (4,0);
+    \pockelscell[name=pockels cell, angle=90, shift=0.8] at (7.5,-.5);
+\end{tikzpicture}

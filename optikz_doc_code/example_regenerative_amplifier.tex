@@ -1,0 +1,56 @@
+\begin{tikzpicture}[scale=0.9]
+    
+    \def\devangle{1.75} % angle to the coordinate axis
+    \def\smallang{5}    % mirror reflection angle
+    \def\ang{180-2*66}  % TFP reflection angle
+    \def\TFPdist{5.1}
+
+    \draw[thick] (0,0) -- (180+\devangle:7)coordinate(M2) -- 
+    ++(\devangle-\smallang:3.8)coordinate(TFP2) -- 
+    ++(\devangle-\smallang+\ang:3.5)coordinate(Lambda) --
+    ++(\devangle-\smallang+\ang:\TFPdist-3.5)coordinate(TFP1) -- 
+    ++(\devangle-\smallang+\ang+\ang:3.8)coordinate(M1) -- (0,0);
+    
+    \filldraw[fill=red!60!black, fill opacity=0.7, draw=black, thick] ($(M1)+(0.15,-0.1)$) rectangle ++(-.3,-.2); 
+    
+    \mirror[angle=90-\devangle+0.5*\smallang] at (M1);
+    \curvedmirror[angle=180+\devangle-\smallang*0.5] at (M2);
+    \mirror[angle=-45] at (0,0);
+    \TFP[angle=\devangle-\smallang-66] at (TFP2);
+    \TFP[angle=\devangle-\smallang+\ang-66] at (TFP1);
+    \tinysplitter[angle=\devangle-\smallang+\ang] at (Lambda);
+    \pockelscell[angle=\devangle-\smallang+\ang, shift=0.8, name=Pockels cell] at (-1.75,1);
+    
+    \node at ($(M2)+(0,1.2)$){curved mirror\\$R=\SI{5}{\m}$};
+    \node at ($(TFP2)+(1,0)$){TFP};
+    \node at ($(TFP1)+(0.7,0)$){TFP};
+    \node at ($(Lambda)+(-0.5,0.5)$){$\lambda/2$};
+
+    \draw[ultra thick, red!60!black, {latex}-] ($(M1)+(0,0.5)$) --node[right]{pump} +(0,1);
+    \draw[thick] (TFP1) -- ++(\devangle-\smallang+\ang-10:0.3) -- ++(\devangle-\smallang+\ang:1.5)coordinate(Pol1) -- ++(\devangle-\smallang+\ang:1.5)coordinate(M0);
+    \draw[thick, {latex}-] (M0) -- ++(0,-1.5)coordinate(F2) -- ++ (0,-1)coordinate(F1) --++ (0,-4) node[below]{Input};
+    
+    % amplifier input
+    \def\offset{2.7}
+    \fill[gray, fill opacity=0.2, rounded corners=1mm] ($(F2)+(-0.7,0.5)$) rectangle ($(F1)+(0.7,-0.4)$);
+    \fill[gray, fill opacity=0.2, rounded corners=1mm] ($(F1)+(-0.7,-\offset-1)$) rectangle ($(F1)+(0.7,-\offset+1.8)$);
+    
+    \coordinate (FR) at ($(F1)+(0,-2)$);
+    \coordinate (BS1) at ($(F1)+(0,-\offset-0.5)$);
+    \coordinate (BS2) at ($(F1)+(0,-\offset+2)$);
+    \coordinate (Lambda2) at ($(F1)+(0,-\offset+1.5)$);
+    
+    \faradayrotator[angle=90] at (FR);
+    \tinysplitter[angle=90] at (Lambda2);
+    \BScrystal[angle=0, width=0.5] at (BS1);
+    \convexlens[angle=90, width=0.8] at (F1);
+    \concavelens[angle=90, width=0.8] at (F2);
+    \mirror[angle=(\devangle-\smallang+\ang+90)/2] at (M0);
+    
+    \node at ($(F1)+ (1.8,0.5)$){adaptation\\telescope};
+    \node at ($(F1)+ (1.8,-\offset+0.4)$){Optical\\diode};
+    \node[anchor=west] at ($(M1)+(0.5,-0.3)$){laser material};
+    
+    \draw[thick, -{latex}] (TFP2) -- ++(\devangle-\smallang+\ang+180+10:0.3) -- ++(\devangle-\smallang+\ang+180:1)node[left]{Output};
+    
+\end{tikzpicture}

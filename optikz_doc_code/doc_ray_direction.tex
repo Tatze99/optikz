@@ -1,0 +1,7 @@
+\begin{tikzpicture}
+    \coordinate (A) at (-2,0);
+    \coordinate (B) at (2,0);
+    \draw[very thick] (A) --node[laserdir]{\laserdir} (B);
+    \mirror[angle=180] at (A);
+    \mirror[angle=0] at (B);
+\end{tikzpicture}

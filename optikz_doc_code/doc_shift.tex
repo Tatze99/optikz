@@ -1,0 +1,14 @@
+\begin{tikzpicture}
+    \draw[thick] (-.5,-0.3) -- +(13,0);
+    \draw[thick] (-.5,-3) -- +(13,0);
+    \draw[thick] (-.5,-5) -- +(13,0);
+    \drawallelements at (0,-0.3);
+    \drawallelements[shift=0.5] at (0,-3);
+    \drawallelements[shift=-0.5] at (0,-5);
+    \node[anchor=east] at (-.8,-0.3){\texttt{shift=0}};
+    \node[anchor=east] at (-.8,-3){\texttt{shift=0.5}};
+    \node[anchor=east] at (-.8,-5){\texttt{shift=-0.5}};
+    \pockelscell at (10.93,-0.3);
+    \pockelscell[shift=0.5] at (10.93,-3);
+    \pockelscell[shift=-0.5] at (10.93,-5);
+\end{tikzpicture}
