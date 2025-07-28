@@ -1,0 +1,358 @@
+%% optikz.sty
+%% Copyright 2025 Martin Beyer
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainer of this work is Martin Beyer.
+%
+% This work consists of the files optikz.sty optikz_doc.tex and 
+% the optikz_doc_code folder which contains all examples used in the documentation
+
+\documentclass[fontsize=12pt,rgb]{scrartcl}
+\usepackage{optikz}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage[font=small]{caption}
+\usepackage{fourier}
+\usepackage{hyperref}
+\usepackage{multicol}
+\usepackage[a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=3cm]{geometry}
+\usepackage{listings}
+
+% Define custom colors
+\definecolor{codebg}{rgb}{0.97,0.97,0.97}
+\definecolor{keywordcolor}{rgb}{0.1,0.1,0.8}
+\definecolor{commentcolor}{rgb}{0.4,0.4,0.4}
+\definecolor{stringcolor}{rgb}{0.0,0.5,0.0}
+\definecolor{identifiercolor}{rgb}{0.4, 0.0, 0.4}
+
+% Configure listings for LaTeX code
+\lstdefinestyle{latexstyle}{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{keywordcolor}\bfseries,
+  stringstyle=\color{stringcolor},
+  commentstyle=\color{commentcolor}\itshape,
+  identifierstyle=\color{identifiercolor},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  tabsize=2,
+  escapeinside={(*@}{@*)},
+  language=[LaTeX]TeX
+}
+
+\lstset{style=latexstyle}
+\definecolor{Gruen}{cmyk}{1,0.1,0.7,0.5}
+\setlength{\parindent}{0pt}
+
+
+\usetikzlibrary{external}
+% \tikzexternalize[prefix=optikz_doc_figures/] % activate!
+ 
+\newcommand{\inputtikz}[1]{%
+  \tikzsetnextfilename{#1}%
+  \input{optikz_doc_code/#1.tex}%
+}
+
+
+\begin{document}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\begin{titlepage}
+  \center
+  \HRule \\[0.4cm]
+  { \Huge The \texttt{Optikz} Package}\\[0.15cm]
+  \HRule \\[0.5cm]
+  \textsc{\Large Martin Beyer}\\[0.35cm]
+  \textsc{July 28th, 2025,  Version 1.0}\\[0.35cm]
+  \vfill
+  \inputtikz{example_CPA_system}
+  \vfill
+  \begin{multicols}{2}
+    \tableofcontents
+\end{multicols}
+\end{titlepage}
+
+
+\section{Introduction}
+Welcome to the documentation of Optikz, a ``\LaTeX{} package'' used for creating pictures of optical laser setups using Tikz. The design of the optical components is heavily inspired by the ``\href{https://www.gwoptics.org/ComponentLibrary/}{\texttt{Components library}}'' of Alexander Franzen.
+
+The code relies on the \texttt{TikZ} package which is automatically loaded when calling this package. 
+This project was initially conceptuated for creating schematic drawings in my Bachelor thesis in 2020. Since then I refined my code and decided to write a small documentation about it.
+
+
+\section{Tutorial}
+Karl\footnote{The paragraph is inspired by the Tutorial of the TIKZ documentation by Till Tantau} is a laser physicist at a research institute. He used to create the graphics of his laser setups with programs like Gimp or Inkscape. While his graphics were acceptable, drawing them was often a lengthy and tedious process. Also, when he wanted to change anything in his graphics, he had to reopen his graphics program and export every single image again. When he wanted to include text into his graphics, it always seemed to be a bit off compared to font size of his \LaTeX \; project. Therefore, he decided to draw his graphics using Tikz. However, creating nice drawings of mirrors, lenses and measurement devices seemed way too complicated. Karl's colleague was not satisfied with the results of his graphics, so he told Karl about a small package to help him with his problem.
+
+With this package called Optikz, Karl can now draw all optical elements of his desire without having to worry about their graphical design. He starts by opening a Tikz environment:
+
+\begin{lstlisting}
+\documentclass{article}
+\usepackage{optikz}
+\begin{document}
+    \begin{tikzpicture}
+        ...
+    \end{tikzpicture}
+\end{document}
+\end{lstlisting}
+
+First he adds a mirror to his setup. He notices that the \verb!\mirror! command has several optional arguments. They are as follows:
+\begin{itemize}
+    \item \texttt{angle}: Defines the angle to the $x$-axis.
+    \item \texttt{width}: Defines the width or diameter (standard value: 1) of the mirror.
+    \item \texttt{thickness}: Defines the thickness (standard value: 1) of the mirror.
+    \item \texttt{color}: Changes the color of the mirror.
+    \item \texttt{shift}: shifts the anchor point along the surface of the mirror (standard value: 0).
+\end{itemize}
+Karl now starts with a simple drawing of a delay stage with two colored, off-centered mirrors. He notices that he can either specify the coordinates of the mirrors directly or define the coordinates first using tikz and draw the mirrors at the coordinate positions. 
+\begin{figure}[htp]
+    \centering
+    \inputtikz{tutorial_delay_stage}
+    \caption{Drawing of a simple delay stage. It is advised to define a coordinate for every optical element, this binds the laser beam position to the mirror positions, such that changes of the mirror positions can be made easily.}
+\end{figure}
+
+\lstinputlisting{optikz_doc_code/tutorial_delay_stage.tex}
+
+\newpage
+\section{Documentation}
+
+\subsection{Colors}
+Optikz defines several colors, which are used for the various optical components, they are defined as follows:
+\begin{lstlisting}
+\definecolor{optikzblue}{rgb}{0.56,0.663,0.723}
+\definecolor{optikzred}{rgb}{0.7,0.2,0.2}
+\definecolor{optikzyellow}{rgb}{1,0.86,0}
+\end{lstlisting}
+
+Generally, the color of every single component can be changed by using the \texttt{$\backslash$color} argument when creating the optical component. Note that \texttt{optikzblue} is the standard color used in the \texttt{$\backslash$color} argument. If you want to change the colorscheme of Optikz, you can do that by redefining the colors. This is done with 
+\begin{lstlisting}
+\redefinecolor{optikzblue}{0.1,0.1,0.1}
+\end{lstlisting}
+where the second argument is the \texttt{rgb} value of the color. If you ever want to roll back to the standard colors you can do that with:
+\begin{lstlisting}
+\resetcolor{optikzblue}
+\end{lstlisting}
+
+\subsection{Rays and beams}
+The drawing of a laser beam is quite simple. We just use the standard TikZ \verb!\draw! function to visualize a ray in our system. We can draw an arrow to indicate the direction of the beam in the following way: 
+
+\begin{figure}[htp]
+  \centering
+  \inputtikz{doc_ray_direction}
+  \caption{Draw a simple ray with TikZ.}
+\end{figure}
+\lstinputlisting{optikz_doc_code/doc_ray_direction.tex}
+
+The custom node \verb!\laserdir! has some options we can utilize:
+\begin{lstlisting}
+node[laserdir, pos=0.5, xscale=1, color=black]{\ laserdir}
+\end{lstlisting}
+With \verb!pos! we can change the position along the line segment, \verb!xscale = {-1,1}! changes the direction of the arrow and \verb!color! changes the color of the arrowhead.
+
+Furthermore, we can also draw beams and even indicate color splitting e.g. in an optical stretcher. For a beam we need the anchor points of the mirrors of each segment, their angle and and some optional parameters (beam size, color):
+\begin{lstlisting}
+\drawrainbow[size M1=0.8][size M2=0.8]{pos M1}{pos M2}{angle M1}{angle M2}
+\drawbeam[size M1=0.8][size M2=0.8][fill color=black][border color=black]{pos M1}{pos M2}{angle M1}{angle M2}
+\end{lstlisting}
+Then, we can draw a picture like this:
+\begin{figure}[htp]
+  \centering
+  \inputtikz{doc_beam}
+  \caption{Drawing of a rainbow beam (left) and normal beam (right).}
+\end{figure}
+\lstinputlisting{optikz_doc_code/doc_beam.tex}
+
+\subsection{Optical elements}
+Most optical elements follow the same command structure as for a TikZ-Node. The only mandatory argument for each component is it's $(x,y)$ position. This can be passed by stating the coordinate directly or by passing a TikZ-coordinate. The optional arguments are passed with their respective keywords in a square bracket after the command. A complete list of all optional arguments can be found in section~\ref{sec:Optional_arguments}.
+\begin{lstlisting}
+% standard command
+\command[<optional paramer>=value] at (x,y); 
+
+% specifying the coordinates via a TikZ-coordinate
+\coordinate (P1) at (x,y);
+\command[<optional paramer>=value] at (P1); 
+\end{lstlisting}
+A comprehensive list of all optical elements (lenses, splitters, mirrors, gratings) is given in Figure~\ref{fig:optical_elements}. Note that not all optional arguments are shown in this figure, as some elements like \texttt{$\backslash$splitter} have additional arguments like \texttt{shift} or \texttt{wedge} which enable further customization of the element. 
+\begin{figure}[htp]
+  \centering
+  \inputtikz{doc_optical_elements}
+  \caption{Different optical elements with a demonstration of their various optional arguments. The black arrow indicates the position of the anchor point. For reflective optics, the anchor point is on the surface, whereas for concave and convex lenses the anchor point is the center of the lens.}
+  \label{fig:optical_elements}
+  \vspace{-3cm}
+\end{figure}
+
+\newpage
+\subsection{Optical devices}
+
+The optical devices follow the same command structure as the optical elements
+\begin{lstlisting}
+  % standard command
+  \command[<optional paramer>=value] at (x,y); 
+  
+  % specifying the coordinates via a TikZ-coordinate
+  \coordinate (P1) at (x,y);
+  \command[<optional paramer>=value] at (P1); 
+\end{lstlisting}
+The difference is that they add some other optional arguments like \verb!name! which is used to place a node with a text into the optical device. Furthermore, some elements have a redefined color like \verb!optikzred! or \verb!optikzyellow!. The color can still be accessed and changed using the \verb!color! argument.
+
+The \verb!\pockelscell! is the only device which utilizes the \verb!shift! parameter. Usually, the housing of Pockels cell's is rather asymmetric, which can be realized easily as shown in figure~\ref{fig:Pockels_cell}.
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_Pockels_cell_shift}
+    \caption{Usage of the \texttt{shift} parameter in the \texttt{$\backslash$pockelscell} command.}
+    \label{fig:Pockels_cell}
+\end{figure}
+ 
+\lstinputlisting{optikz_doc_code/doc_Pockels_cell_shift.tex}
+ 
+\begin{figure}[htp]
+  \centering
+  \inputtikz{doc_optical_devices}
+  \caption{Different devices of an optical setup.}
+  % \label{}
+\end{figure}
+
+\newpage
+\subsection{Optional arguments}\label{sec:Optional_arguments}
+In the following we want to discuss all optional arguments that can be set for the optical elements and devices. The discussion is done for the optical elements, but most of them apply similarly to the 
+
+\subsubsection{Angle}
+The \verb!angle! (standard value 0) argument is used for every single device and rotates the element around the anchor point in anti-clockwise direction.
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_angle}
+    \caption{Demonstration of the angle argument.}
+\end{figure}
+
+\subsubsection{Width}
+The \verb!width! (standard value 1) argument is used for every single device. It determines the width of the element perpendicular to the laser direction and is a multiplicative scaling factor. 
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_width}
+    \caption{Demonstration of the width argument.}
+\end{figure}
+
+\newpage
+\subsubsection{Thickness and strip}
+The \verb!thickness! (standard value 1) argument controls the thickness of the optical element along the beam axis as a scalable factor. The \verb!strip! (standard value 1) argument scales the thickness of the black strip for the mirrors and the grating.
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_thickness}
+    \caption{Demonstration of the \texttt{thickness} and \texttt{strip} argument. The Arguments don't apply for the beamsplitter crystal and the parabola.}
+\end{figure}
+
+\subsubsection{Color}
+The \verb!color! (standard value \verb!optikzblue!) argument can be applied to every optical element. 
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_color}
+    \caption{Demonstration of the \texttt{color} argument.}
+\end{figure}
+
+\newpage
+\subsubsection{Shift}
+The \verb!shift! (standard value 0) argument does only act on elements with a \emph{planar} surface. This is partly due to my lazyness to calculate the anchor point for a shift on a curved surface for every possible angle, but also not necessary. The reasons is that the lowest aberrations occur in the center of the optical element like a lens, thus it's rarely needed to place a lens off-centered into the optical setup.
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_shift}
+    \caption{Demonstration of the \texttt{shift} command. Since the \texttt{pockelscell} is the only device affected by \texttt{shift}, it is included here.}
+\end{figure}
+
+\subsubsection{Name}
+The \verb!name! (standard value \{ \}) argument does only act on certain devices large enough to support text inside them. The text is placed in the center of the device and rotates along its axis. Furthermore, the text is rotated such that it is never placed upside down. It is also possible to wrap the text in curly braces to change its fontsize or use $\backslash\backslash$ for a line break:
+\begin{lstlisting}
+\objective[name={\scriptsize objective}] at (x,y);
+\spectrometer[name={spectro\\meter}] at (x,y);
+\end{lstlisting}
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_name}
+    \caption{Demonstration of the \texttt{name} argument. If the \texttt{angle} of the device is larger than \SI{90}{\degree}, the text is rotated by \SI{180}{\degree} for better reading.}
+\end{figure}
+
+
+\subsubsection{Wedge}
+The \verb!wedge! (standard value 1) argument does only act on the \verb!\splitter! command. It extends the thickness at the bottom by a scalable factor of the thickness. We can create wedges in the following way:
+
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_wedge}
+    \caption{Demonstration of the \texttt{wedge} argument. In order to obtain mirrored wedges, the \texttt{wedge} argument receives its reciprocate value and the \texttt{thickness} argument the original \texttt{wedg}e value.}
+\end{figure}
+
+\newpage
+\subsection{Special optical elements}
+There are some elements that are also defined as specific devices. However, all of them are special cases of the previously mentioned general commands. The following figure lists all special devices with their respective definitions. You can still access all parameters, just the standard value of different parameters was changed.
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_optical_elements_special}
+    \caption{List of the different special optical elements.}
+    % \label{fig:my_label}
+\end{figure}
+
+\newpage
+\section{Examples}
+
+\subsection{Butterfly amplifier}
+The butterfly setup is the most simple variant of a multi-pass amplifier realized by several plane mirrors redirecting the beam. An example is shown in figure \ref{fig:butterfly}. 
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{example_butterfly}
+    \caption{Butterfly amplifier}
+    \label{fig:butterfly}
+\end{figure}
+
+\lstinputlisting{optikz_doc_code/example_butterfly.tex}
+
+\subsection{Regenerative amplifier}
+A typical regenerative amplifier is realized by a ring cavity, where the input- and output- coupling is done via TFP's and a Pockels cell. An example is shown in figure \ref{fig:regenerative_amplifier}. 
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{example_regenerative_amplifier}
+    \caption{Schematic layout of a typical regenerative amplifier.}
+    \label{fig:regenerative_amplifier}
+\end{figure}
+
+\lstinputlisting{optikz_doc_code/example_regenerative_amplifier.tex}
+
+\newpage
+\subsection{CPA system}
+A full chirped pulse amplification (CPA) system is shown here, which is also displayed on the first page of this documentation.
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{example_CPA_system}
+    \caption{Schematic layout of a CPA amplifier.}
+    \label{fig:CPA_amplifier}
+\end{figure}
+
+\lstinputlisting{optikz_doc_code/example_CPA_system.tex}
+
+\tikzexternaldisable
+
+
+
+\end{document}

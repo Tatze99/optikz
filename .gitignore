@@ -1,0 +1,9 @@
+*
+
+!*/optikz_doc_code
+!*.git*
+
+!*.md
+!*.tex
+!*.pdf
+!*.sty
