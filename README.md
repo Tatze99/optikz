@@ -4,8 +4,8 @@ README for optikz.sty
 
 **Author**: Martin Beyer  
 **Released**: July 29, 2025  
-**License**: LaTeX Project Public License (LPPL)  
-**Contact**: martinbeyer99@gmail.com
+**License**: LaTeX Project Public License (LPPL Version 1.3c 2008-05-04)
+**Contact**: martinbeyer99@googlemail.com
 
 See http://www.ctan.org/tex-archive/help/Catalogue/licenses.lppl.html for the details of the license.
 
