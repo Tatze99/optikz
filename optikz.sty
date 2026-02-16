@@ -510,7 +510,7 @@
         }
         -- ++(0, {0.5 * \optikzwidth / \optikzgrooves})
         -- ++({0.1*\optikzgroovethickness + 0.2*\optikzthickness}, 0) 
-        -- ++(0, {-\optikzwidth}) -- cycle;
+        -- ++(0, {-\optikzwidth}) -- ++({-0.1*\optikzgroovethickness - 0.2*\optikzthickness}, 0) --++(0, {\optikzwidth / (2*\optikzgrooves)});
     \end{scope}
 
   \fill[fill=black,rotate around={\optikzangle:(anchor)}] 

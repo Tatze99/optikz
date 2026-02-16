@@ -1,14 +1,19 @@
 \begin{tikzpicture}
-    \draw[thick] (-.5,-0.3) -- +(13,0);
+    \draw[thick] (-.5,0) -- +(13,0);
     \draw[thick] (-.5,-3) -- +(13,0);
     \draw[thick] (-.5,-5) -- +(13,0);
-    \drawallelements at (0,-0.3);
+    \drawallelements at (0,0);
     \drawallelements[shift=0.5] at (0,-3);
     \drawallelements[shift=-0.5] at (0,-5);
-    \node[anchor=east] at (-.8,-0.3){\texttt{shift=0}};
+    \node[anchor=east] at (-.8,0){\texttt{shift=0}};
     \node[anchor=east] at (-.8,-3){\texttt{shift=0.5}};
     \node[anchor=east] at (-.8,-5){\texttt{shift=-0.5}};
-    \pockelscell at (10.93,-0.3);
-    \pockelscell[shift=0.5] at (10.93,-3);
-    \pockelscell[shift=-0.5] at (10.93,-5);
+    \foreach \y in {0,-3,-5}{
+        \fill[white] (9.5,\y+1) rectangle (12,\y-1);
+        \draw[thick, -] (9.5,\y) -- ++(3.5,0);
+    }
+    \pockelscell at (10.5,0);
+    \pockelscell[shift=0.5] at (10.5,-3);
+    \pockelscell[shift=-0.5] at (10.5,-5);
+
 \end{tikzpicture}
