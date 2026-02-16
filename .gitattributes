@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+*.sty text eol=lf
+*.tex text eol=lf
+*.ins text eol=lf
+*.dtx text eol=lf
+*.md text eol=lf
