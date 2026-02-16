@@ -1,27 +1,38 @@
 \begin{tikzpicture}
+    \def\angleone{45+22.5}
+    \def\angletwo{225+22.5}
     \coordinate (A) at (1,1);
-    \coordinate (B) at (2,2);
-    \coordinate (C) at (2,0);
-    \coordinate (D) at (5,3);
-    \drawrainbow[0]{A}{B}{225}{45}
-    \drawrainbow{B}{C}{45}{-90}
-    \drawrainbow[0.8][1.2]{C}{D}{-90}{45}
-    \grating[angle=225] at (A);
-    \mirror[angle=45] at (B);
-    \mirror[angle=-90] at (C);
+    \coordinate (B) at (3,3);
+    \coordinate (C) at (3,0);
+    \coordinate (D) at (6,3);
+    \drawrainbow[width start=0, width end=0.6]
+                {A}{B}{\angletwo+180}{\angleone}
+    \drawrainbow[width start=0.6, width end=0.9]
+                {B}{C}{\angleone}{\angletwo+180}
+    \drawrainbow[width start=0.9, width end=1.2]
+                {C}{D}{\angletwo+180}{45}
+    \grating[angle=\angletwo] at (A);
+    \mirror[angle=\angleone] at (B);
+    \mirror[angle=\angletwo, width=1.2] at (C);
     \mirror[angle=45, width=1.5] at (D);
     
-    \begin{scope}[shift={(6,0)}]
+    \begin{scope}[shift={(7.5,0)}]
+    \coordinate (start) at (1,3);
     \coordinate (A) at (1,1);
-    \coordinate (B) at (2,2);
-    \coordinate (C) at (2,0);
-    \coordinate (D) at (5,3);
-    \drawbeam[0.8][0.8][optikzred]{A}{B}{225}{45}
-    \drawbeam[0.8][0.8][optikzred]{B}{C}{45}{-90}
-    \drawbeam[0.8][1.2][optikzred]{C}{D}{-90}{45}
-    \mirror[angle=225] at (A);
-    \mirror[angle=45] at (B);
-    \mirror[angle=-90] at (C);
+    \coordinate (B) at (3,3);
+    \coordinate (C) at (3,0);
+    \coordinate (D) at (6,3);
+    \drawbeam[width start=0.3, width end=0.4]
+              {start}{A}{90}{\angletwo}
+    \drawbeam[width start=0.4, width end=0.6]
+              {A}{B}{\angletwo}{\angleone}
+    \drawbeam[width start=0.6, width end=0.8]
+              {B}{C}{\angleone}{\angletwo}
+    \drawbeam[width start=0.8, width end=1.1]
+              {C}{D}{\angletwo}{45}
+    \mirror[angle=\angletwo] at (A);
+    \mirror[angle=\angleone] at (B);
+    \mirror[angle=\angletwo] at (C);
     \mirror[angle=45, width=1.5] at (D);
     \end{scope}
 \end{tikzpicture}

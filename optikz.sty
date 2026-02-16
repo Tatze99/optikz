@@ -1,4 +1,4 @@
-%% optikz version 1.0.0
+%% optikz version 1.1.0
 %% Copyright (C) 2025 Martin Beyer
 %
 % This work may be distributed and/or modified under the
@@ -17,7 +17,7 @@
 % the optikz_doc_code folder which contains all examples used in the documentation
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesPackage{optikz}[2025/07/29 optikz]
+\ProvidesPackage{optikz}[2026/02/16 optikz]
 
 \RequirePackage{amssymb} % if amssymb is not loaded here but in the main document, it breaks the code
 \RequirePackage{tikz}
@@ -66,40 +66,128 @@
 % Define the laser node style
 \tikzset{laserdir/.style={sloped, midway, allow upside down}}
 
-% rays and beams    
-\NewDocumentCommand{\drawrainbow}{O{0.8} O{0.8} m m m m}{%
-    \pgfmathsetmacro{\angleStart}{#5}
-    \pgfmathsetmacro{\angleEnd}{#6}
-    \pgfmathsetmacro{\dxstart}{abs(sin(\angleStart)) * #1}
-    \pgfmathsetmacro{\dystart}{cos(\angleStart) * #1}
-    \pgfmathsetmacro{\dxend}{abs(sin(\angleEnd)) * #2}
-    \pgfmathsetmacro{\dyend}{cos(\angleEnd) * #2}
+% rays and beams   
+\pgfkeys{
+  /beam/.is family,
+  /beam,
+  width start/.initial=0.8,
+  width start/.store in=\beamwidthstart,
+  width end/.initial=0.8,
+  width end/.store in=\beamwidthend,
+  fill color/.initial=red,
+  fill color/.store in=\beamfillcolor,
+  draw color/.initial=black,
+  draw color/.store in=\beamdrawcolor,
+  opacity/.initial=0.7,
+  opacity/.store in=\beamopacity
+}
 
-    \coordinate (start) at ($(#3)+ ({-0.5*abs(sin(\angleStart)) * #1}, {0.5*cos(\angleStart) * #1})$);
-    \coordinate (end) at ($(#4)+ ({-0.5*abs(sin(\angleEnd)) * #2}, {0.5*cos(\angleEnd) * #2})$);
+% macro to calculate the geometry of a beam
+\newcommand{\beamgeometry}[5]{%
+    
+    \pgfmathsetmacro{\angleStart}{#4}
+    \pgfmathsetmacro{\angleEnd}{#5}
+    
+    \path (#2); \pgfgetlastxy{\xA}{\yA}
+    \path (#3); \pgfgetlastxy{\xB}{\yB}
+    
+    \pgfmathsetmacro{\dx}{\xB - \xA}
+    \pgfmathsetmacro{\dy}{\yB - \yA}
+    \pgfmathsetmacro{\length}{veclen(\dx,\dy)}
+    \pgfmathsetmacro{\ux}{\dx/\length}
+    \pgfmathsetmacro{\uy}{\dy/\length}
+    
+    \pgfmathsetmacro{\normalxStart}{-cos(\angleStart)}
+    \pgfmathsetmacro{\normalyStart}{-sin(\angleStart)}
+    \pgfmathsetmacro{\normalxEnd}{-cos(\angleEnd)}
+    \pgfmathsetmacro{\normalyEnd}{-sin(\angleEnd)}
+    
+    \pgfmathsetmacro{\dotStart}{abs(\ux*\normalxStart + \uy*\normalyStart)}
+    \pgfmathsetmacro{\dotEnd}{abs(\ux*\normalxEnd + \uy*\normalyEnd)}
+    
+    \pgfmathsetmacro{\dxstart}{sin(\angleStart) * \beamwidthstart/\dotStart}
+    \pgfmathsetmacro{\dystart}{cos(\angleStart) * \beamwidthstart/\dotStart}
+    \pgfmathsetmacro{\dxend}{sin(\angleEnd) * \beamwidthend/\dotEnd}
+    \pgfmathsetmacro{\dyend}{cos(\angleEnd) * \beamwidthend/\dotEnd}
+    
+    \coordinate (beamstart) at 
+        ($(#2)+({-0.5*sin(\angleStart) * \beamwidthstart/\dotStart},
+                { 0.5*cos(\angleStart) * \beamwidthstart/\dotStart})$);
+                
+    \coordinate (beamend) at 
+        ($(#3)+({-0.5*sin(\angleEnd) * \beamwidthend/\dotEnd},
+                { 0.5*cos(\angleEnd) * \beamwidthend/\dotEnd})$);
+}
+
+\NewDocumentCommand{\drawrainbow}{O{} m m m m}{%
+    % Reset defaults
+    \pgfkeys{/beam/.cd,
+        width start=0.8,
+        width end=0.8,
+        opacity=0.7,
+    }%
+    % Apply user options
+    \pgfkeys{/beam,#1}%
+    
+    \beamgeometry{}{#2}{#3}{#4}{#5}
     
     \foreach \w in {400,...,700}{
         \pgfmathsetmacro{\slope}{(\w - 400) / (700 - 400)}
 
         \definecolor{currentcol}{wave}{\w}
-        \draw[line width=.05pt, color=currentcol] 
-        ($(start)+(\dxstart * \slope, -\dystart * \slope)$) -- 
-        ($(end)+(\dxend * \slope, -\dyend * \slope)$);
+        \draw[line width=.05pt, color=currentcol, opacity=\beamopacity] 
+        ($(beamstart)+(\dxstart * \slope, -\dystart * \slope)$) -- 
+        ($(beamend)+(\dxend * \slope, -\dyend * \slope)$);
     }
 }
 
-\NewDocumentCommand{\drawbeam}{O{0.8} O{0.8} O{black} O{black} m m m m}{%
-    \pgfmathsetmacro{\angleStart}{#7}
-    \pgfmathsetmacro{\angleEnd}{#8}
-    \pgfmathsetmacro{\dxstart}{sin(\angleStart) * #1}
-    \pgfmathsetmacro{\dystart}{cos(\angleStart) * #1}
-    \pgfmathsetmacro{\dxend}{sin(\angleEnd) * #2}
-    \pgfmathsetmacro{\dyend}{cos(\angleEnd) * #2}
+\NewDocumentCommand{\drawbeam}{O{} m m m m}{%
+    % Reset defaults
+    \pgfkeys{/beam/.cd,
+        width start=0.8,
+        width end=0.8,
+        fill color=optikzred,
+        draw color=black,
+        opacity=0.7
+    }%
+    % Apply user options
+    \pgfkeys{/beam,#1}%
 
-    \coordinate (start) at ($(#5)+ ({-0.5*sin(\angleStart) * #1}, {0.5*cos(\angleStart) * #1})$);
-    \coordinate (end) at ($(#6)+ ({-0.5*sin(\angleEnd) * #2}, {0.5*cos(\angleEnd) * #2})$);
+    \beamgeometry{}{#2}{#3}{#4}{#5}
     
-    \filldraw[fill=#3, draw=#4, thick]  (start) -- +(\dxstart, -\dystart) -- (end) -- ++ (\dxend, -\dyend) -- cycle;
+    \filldraw[ fill=\beamfillcolor, draw=\beamdrawcolor, thick, fill opacity=\beamopacity]
+        (beamstart)
+        -- +(\dxstart,-\dystart)
+        -- (beamend)
+        -- ++(\dxend,-\dyend)
+        -- cycle;
+}
+
+% Calculate the angle of the vector AB with the x-axis
+% Can be used to position elements along a beam path with the right orientation
+\newcommand{\optikzangletwopoints}[3]{%
+  \path let
+    \p1 = (#1),
+    \p2 = (#2)
+  in
+    \pgfextra{
+      \pgfmathparse{atan2(\y2-\y1,\x2-\x1)}%
+      \global\edef#3{\pgfmathresult}%
+    };
+}
+
+% Calculate the half angle of the triangle ABC 
+% Can be used to position reflective elements at point B with the right orientation to fulfill the law of reflection
+\newcommand{\optikzanglethreepoints}[4]{%
+  \path let
+    \p1 = (#1),
+    \p2 = (#2),
+    \p3 = (#3)
+  in
+    \pgfextra{
+      \pgfmathparse{0.5*atan2(\y2-\y1,\x2-\x1)+0.5*atan2(\y2-\y3,\x2-\x3)}%
+      \global\edef#4{\pgfmathresult}%
+    };
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,12 +214,21 @@
   name/.initial=,
   name/.get=\optikzname,
   name/.store in=\optikzname,
-  wedge/.initial=1,
+  wedge/.initial=0,
   wedge/.get=\optikzwedge,
   wedge/.store in=\optikzwedge,
   strip/.initial=1,
   strip/.get=\optikzstrip,
-  strip/.store in=\optikzstrip
+  strip/.store in=\optikzstrip,
+  radius/.initial=1.462,
+  radius/.get=\optikzradius,
+  radius/.store in=\optikzradius,
+  grooves/.initial=7,
+  grooves/.get=\optikzgrooves,
+  grooves/.store in=\optikzgrooves,
+  groovethickness/.initial=1,
+  groovethickness/.get=\optikzgroovethickness,
+  groovethickness/.store in=\optikzgroovethickness
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -166,7 +263,28 @@
   \expandafter\def\csname #1@eat@at\endcsname t (##1);{%
     \csname #2\endcsname{##1}%
     \softresetcolor{optikzblue}% optional, your color reset
-    \pgfkeys{/mirror,angle=0, width=1, color=optikzblue, thickness=1, shift=0, wedge=1, name={}, strip=1}%
+    \pgfkeys{/mirror,angle=0, width=1, color=optikzblue, thickness=1, shift=0, wedge=0, name={}, strip=1, radius=1.462, grooves=7}%
+  }%
+}
+
+% setup the geometry of curved surfaces
+
+\def\optikz@setupgeometry{%
+  % Effective radius (visual vs physical)
+  \pgfmathsetmacro{\optikz@effradius}{%
+    (\optikzradius == 1.462)
+    ? \optikzradius * \optikzwidth
+    : \optikzradius
+  }%
+
+  % Half opening angle
+  \pgfmathsetmacro{\optikz@halfangle}{%
+    asin(0.5*\optikzwidth/\optikz@effradius)
+  }%
+
+  % Sagitta / x-distance
+  \pgfmathsetmacro{\optikz@xdist}{%
+    \optikz@effradius*(1-cos(\optikz@halfangle))
   }%
 }
 
@@ -191,6 +309,7 @@
 
 % Helper command for the doc
 \DeclareOpticalElement{drawallelements}{drawallelements@draw}
+\DeclareOpticalElement{drawallcurvedelements}{drawallcurvedelements@draw}
 
 % Declare derived commands
 \DeclareOpticalElement{largemirror}{largemirror@draw}
@@ -203,22 +322,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\mirror@draw#1{%
-  \def\@coordinates{#1}
     \coordinate (shift) at ({0.5 * \optikzshift * \optikzwidth * sin(\optikzangle)},
                             {-0.5 * \optikzshift * \optikzwidth * cos(\optikzangle)});
-    \coordinate (anchor) at ($(\@coordinates)+(shift)$);
+    \coordinate (anchor) at ($(#1)+(shift)$);
 %   \pgfmathsetmacro{\dy}{-0.5 * \optikzshift * \optikzwidth * abs(cos(\optikzangle))}
     \shadedraw[
       thick,
-      rotate around={\optikzangle:(anchor)},
+      transform canvas={rotate around={\optikzangle:(anchor)}},
       top color=\optikzcolor,
       bottom color=\optikzcolor,
-      middle color=white,
-      shading angle=\optikzangle
+      middle color=white
     ] 
     ($(anchor)+(0,-0.5*\optikzwidth)$) rectangle ++(0.3*\optikzthickness,\optikzwidth);
 
-    \fill[fill=black, rotate around={\optikzangle:(anchor)}]
+    \fill[fill=black, transform canvas={rotate around={\optikzangle:(anchor)}}]
     ($(anchor)+(0.3*\optikzthickness,-0.5*\optikzwidth)$) rectangle ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
 }
 
@@ -236,39 +353,52 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 \def\curvedmirror@draw#1{%
-  \def\@coordinates{#1}
-    \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \coordinate (anchor) at (#1);%
+  \optikz@setupgeometry
+
+  \shadedraw[
+    thick,
+    transform canvas={rotate around={\optikzangle:(anchor)}},
     top color=\optikzcolor,
     bottom color=\optikzcolor,
-    middle color=white,
-    shading angle=\optikzangle] 
-        (\@coordinates) arc (0:20:1.462*\optikzwidth) -- 
-        ($(\@coordinates)+(.3*\optikzthickness,0.5*\optikzwidth)$) --
-        ($(\@coordinates)+(.3*\optikzthickness,-0.5*\optikzwidth)$) --
-        ($(\@coordinates)+(-0.08817*\optikzwidth,-0.5*\optikzwidth)$) arc (-20:0:1.462*\optikzwidth);
-    \fill[fill=black,rotate around={\optikzangle:(\@coordinates)}] 
-        ($(\@coordinates)+(0.3*\optikzthickness,-0.5*\optikzwidth)$) rectangle ++
-        (-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
+    middle color=white
+  ]
+    (anchor)
+      arc (0:\optikz@halfangle:\optikz@effradius) --
+      ($(anchor)+(.3*\optikzthickness,0.5*\optikzwidth)$) --
+      ($(anchor)+(.3*\optikzthickness,-0.5*\optikzwidth)$) --
+      ($(anchor)+({-\optikz@effradius*(1-cos(\optikz@halfangle))},-0.5*\optikzwidth)$)
+      arc (-\optikz@halfangle:0:\optikz@effradius);
+
+  \fill[
+    fill=black,
+    transform canvas={rotate around={\optikzangle:(anchor)}}
+  ]
+    ($(anchor)+(0.3*\optikzthickness,-0.5*\optikzwidth)$)
+    rectangle ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 \def\convexmirror@draw#1{%
-  \def\@coordinates{#1}
-    \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \coordinate (anchor) at (#1);%
+  \optikz@setupgeometry
+
+  \shadedraw[
+    thick, 
+    transform canvas={rotate around={\optikzangle:(anchor)}},
     top color=\optikzcolor,
     bottom color=\optikzcolor,
-    middle color=white,
-    shading angle=\optikzangle] 
-        (\@coordinates) arc (180:160:1.462*\optikzwidth) --
-        ($(\@coordinates)+(.3*\optikzthickness,0.5*\optikzwidth)$) --
-        ($(\@coordinates)+(.3*\optikzthickness,-0.5*\optikzwidth)$) --
-        ($(\@coordinates)+(+0.08817*\optikzwidth,-0.5*\optikzwidth)$) arc (200:180:1.462*\optikzwidth);
-    \fill[fill=black,rotate around={\optikzangle:(\@coordinates)}]
-        ($(\@coordinates)+(0.3*\optikzthickness,-0.5*\optikzwidth)$) rectangle ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
+    middle color=white
+    ] 
+        (anchor) arc (180:180-\optikz@halfangle:\optikz@effradius) --
+        ($(anchor)+(\optikz@xdist+.2*\optikzthickness,0.5*\optikzwidth)$) --
+        ++(0, -\optikzwidth) -- 
+        ($(anchor)+(\optikz@xdist,-0.5*\optikzwidth)$) arc (180+\optikz@halfangle:180:\optikz@effradius);
+        
+    \fill[fill=black,transform canvas={rotate around={\optikzangle:(anchor)}}]
+        ($(anchor)+(\optikz@xdist+.2*\optikzthickness,-0.5*\optikzwidth)$) rectangle ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,7 +409,7 @@
   \coordinate (shift) at ({0.5 * \optikzshift * \optikzwidth * sin(\optikzangle)},
                             {-0.5 * \optikzshift * \optikzwidth * cos(\optikzangle)});
   \coordinate (anchor) at ($(\@coordinates)+(shift)$);
-  \shadedraw[thick, top color=white,rotate around={\optikzangle:(anchor)}, bottom color=\optikzcolor, shading angle=\optikzangle+90] ($(anchor)+(0,-0.5*\optikzwidth)$) -- +(0.3*\optikzthickness*\optikzwedge,0) -- +(0.3*\optikzthickness,\optikzwidth) -- +(0,\optikzwidth)  -- cycle;
+  \shadedraw[thick, top color=white, transform canvas={rotate around={\optikzangle:(anchor)}}, bottom color=\optikzcolor, shading angle=90] ($(anchor)+(0,-0.5*\optikzwidth)$) -- +({0.3*\optikzthickness*(1-\optikzwedge)},0) -- +({0.3*\optikzthickness*(1+\optikzwedge)},\optikzwidth) -- +(0,\optikzwidth)  -- cycle;
 }
 
 \def\TFP@draw#1{%
@@ -296,8 +426,8 @@
 }
 
 \def\wedge@draw#1{%
-  \pgfmathsetmacro{\smallerthickness}{0.66\optikzthickness}
-  \pgfmathsetmacro{\newwedge}{1.5\optikzwedge}
+  \pgfmathsetmacro{\smallerthickness}{0.825\optikzthickness}
+  \pgfmathsetmacro{\newwedge}{-0.165\optikzwedge}
   \pgfkeysalso{/mirror, thickness=\smallerthickness, wedge=\newwedge}
   \splitter@draw{#1}
 }
@@ -305,53 +435,58 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\concavelens@draw#1{%
-  \def\@coordinates{#1}
-  \coordinate (shift) at ({(-0.15*\optikzthickness+0.5*0.105)*cos(\optikzangle)},
-                          {(-0.15*\optikzthickness+0.5*0.105)*sin(\optikzangle)});
-  \coordinate (anchor) at ($(\@coordinates)+(shift)$);
-    \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \coordinate (center) at (#1);
+  \optikz@setupgeometry
+  
+  \coordinate (shift) at ({(-0.1*\optikzthickness)*cos(\optikzangle)},
+                          {(-0.1*\optikzthickness)*sin(\optikzangle)});
+  \coordinate (anchor) at ($(#1)+(shift)$);
+    \shadedraw[thick, rotate around={\optikzangle:(center)},
     top color=\optikzcolor,
     bottom color=\optikzcolor,
     middle color=white,
     shading angle=\optikzangle] 
-    (anchor) arc (0:20:1.462*\optikzwidth) -- 
-    ($(anchor)+(.3*\optikzthickness,0.5*\optikzwidth)$) arc (160:200:1.462*\optikzwidth) -- 
-    ($(anchor)+(-0.08817*\optikzwidth,-0.5*\optikzwidth)$) arc (-20:0:1.462*\optikzwidth);
+    (anchor) arc (0:\optikz@halfangle:\optikz@effradius) -- 
+    ($(anchor)+(.2*\optikzthickness+\optikz@xdist,0.5*\optikzwidth)$) arc (180-\optikz@halfangle:180+\optikz@halfangle:\optikz@effradius) -- 
+    ($(anchor)+(-\optikz@xdist,-0.5*\optikzwidth)$) arc (-\optikz@halfangle:0:\optikz@effradius);
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\convexlens@draw#1{%
-  \def\@coordinates{#1}
-  \coordinate (shift) at ({(-0.105-0.05*\optikzthickness)*cos(\optikzangle)},
-                          {(-0.105-0.05*\optikzthickness)*sin(\optikzangle)});
-  \coordinate (anchor) at ($(\@coordinates)+(shift)$);
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \coordinate (center) at (#1);
+  \optikz@setupgeometry
+  
+  \coordinate (shift) at ({(-\optikz@xdist-.08*\optikzthickness)*cos(\optikzangle)},
+                          {(-\optikz@xdist-.08*\optikzthickness)*sin(\optikzangle)});
+  \coordinate (anchor) at ($(center)+(shift)$);
+  \shadedraw[thick, rotate around={\optikzangle:(center)}, % transform doesn't work here
   top color=\optikzcolor,
   bottom color=\optikzcolor,
   middle color=white,
   shading angle=\optikzangle]
-      (anchor) arc (180:160:1.462*\optikzwidth) -- 
-      ($(anchor)+(.1*\optikzthickness+.3*\optikzwidth-2*0.08817*\optikzwidth,+0.5*\optikzwidth)$) arc (20:-20:1.462*\optikzwidth) -- 
-      ($(anchor)+(0.08817*\optikzwidth,-0.5*\optikzwidth)$) arc (200:180:1.462*\optikzwidth);
+      (anchor) arc (180:180-\optikz@halfangle:\optikz@effradius) -- 
+      ($(center)+(0.08*\optikzthickness,+0.5*\optikzwidth)$) arc (\optikz@halfangle:-\optikz@halfangle:\optikz@effradius) -- 
+      ($(anchor)+(\optikz@xdist,-0.5*\optikzwidth)$) arc (180+\optikz@halfangle:180:\optikz@effradius);
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\planconvexlens@draw#1{%
-  \def\@coordinates{#1}
+  \coordinate (center) at (#1);
+  \optikz@setupgeometry
+  
   \coordinate (shift) at ({0.5 * \optikzshift * \optikzwidth * sin(\optikzangle)},
                           {-0.5 * \optikzshift * \optikzwidth * cos(\optikzangle)});
-  \coordinate (anchor) at ($(\@coordinates)+(shift)$);
-  \shadedraw[thick, rotate around={\optikzangle:(anchor)},
+  \coordinate (anchor) at ($(center)+(shift)$);
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(center)}},
   top color=\optikzcolor,
   bottom color=\optikzcolor,
-  middle color=white,
-  shading angle=\optikzangle]
+  middle color=white]
         (anchor) -- ($(anchor)+(0,0.5*\optikzwidth)$) -- 
-        ($(anchor)+(0.1*\optikzthickness+.2-2*0.08817*\optikzwidth,0.5*\optikzwidth)$) arc (20:-20:1.462*\optikzwidth) -- 
+        ($(anchor)+(0.12*\optikzthickness,0.5*\optikzwidth)$) arc (\optikz@halfangle:-\optikz@halfangle:\optikz@effradius) -- 
         ($(anchor)+(0,-0.5*\optikzwidth)$) -- cycle;
 }
 
@@ -363,46 +498,23 @@
   \coordinate (shift) at ({0.5 * \optikzshift * \optikzwidth * sin(\optikzangle)},
                             {-0.5 * \optikzshift * \optikzwidth * cos(\optikzangle)});
   \coordinate (anchor) at ($(\@coordinates)+(shift)$);
-  \shadedraw[thick, rotate around={\optikzangle:(anchor)},
-  top color=\optikzcolor, 
-  bottom color=white, 
-  shading angle=\optikzangle] 
-        (anchor) -- +(0,.039*\optikzwidth) -- 
-        +(.1,.039*\optikzwidth) -- 
-        +(.1,0.116*\optikzwidth) -- 
-        +(0,0.116*\optikzwidth)-- 
-        +(0,0.193*\optikzwidth) -- 
-        +(.1,0.193*\optikzwidth) -- 
-        +(.1,0.270*\optikzwidth) -- 
-        +(0,0.270*\optikzwidth) -- 
-        +(0,0.347*\optikzwidth) -- 
-        +(.1,0.347*\optikzwidth) -- 
-        +(.1,0.424*\optikzwidth) -- 
-        +(0,0.424*\optikzwidth) -- 
-        +(0,0.5*\optikzwidth) -- 
-        +(.3*\optikzthickness,0.5*\optikzwidth) -- 
-        +(.3*\optikzthickness,0);
-  \shadedraw[thick, rotate around={\optikzangle:(anchor)},
-  top color=white, 
-  bottom color=\optikzcolor, 
-  shading angle=\optikzangle] 
-        (anchor) -- +(0,-.039*\optikzwidth) -- 
-        +(.1,-.039*\optikzwidth) -- 
-        +(.1,-0.116*\optikzwidth) -- 
-        +(0,-0.116*\optikzwidth)-- 
-        +(0,-0.193*\optikzwidth) -- 
-        +(.1,-0.193*\optikzwidth) -- 
-        +(.1,-0.270*\optikzwidth) -- 
-        +(0,-0.270*\optikzwidth) -- 
-        +(0,-0.347*\optikzwidth) -- 
-        +(.1,-0.347*\optikzwidth) -- 
-        +(.1,-0.424*\optikzwidth) -- 
-        +(0,-0.424*\optikzwidth) -- 
-        +(0,-0.5*\optikzwidth) -- 
-        +(.3*\optikzthickness,-0.5*\optikzwidth) -- 
-        +(.3*\optikzthickness,0);
+  \begin{scope}[transform canvas={rotate around={\optikzangle:(anchor)}}]
+    
+  \shadedraw[thick, top color=\optikzcolor, bottom color=\optikzcolor, middle color=white] 
+        ($(anchor)+(0,-0.5*\optikzwidth)$)
+        \foreach \i in {2,...,\optikzgrooves} {
+            -- ++(0, {\optikzwidth / (2*\optikzgrooves-1)})
+            -- ++(0.1*\optikzgroovethickness, 0) 
+            -- ++(0, {\optikzwidth / (2*\optikzgrooves-1)}) 
+            -- ++(-0.1*\optikzgroovethickness, 0)
+        }
+        -- ++(0, {0.5 * \optikzwidth / \optikzgrooves})
+        -- ++({0.1*\optikzgroovethickness + 0.2*\optikzthickness}, 0) 
+        -- ++(0, {-\optikzwidth}) -- cycle;
+    \end{scope}
+
   \fill[fill=black,rotate around={\optikzangle:(anchor)}] 
-        ($(anchor)+(0.3*\optikzthickness,-0.5*\optikzwidth)$) rectangle 
+        ($(anchor)+(0.1*\optikzgroovethickness+0.2*\optikzthickness,-0.5*\optikzwidth)$) rectangle 
         ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
 }
 
@@ -410,29 +522,31 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\BScrystal@draw#1{%
-  \def\@coordinates{#1}
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)}, 
+%   \def\@coordinates{#1}
+  \coordinate (anchor) at (#1);
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}}, 
   top color=white, 
   bottom color=\optikzcolor, 
-  shading angle=\optikzangle-45] 
-        ($(\@coordinates)+(-0.5*\optikzwidth*0.7,-0.5*\optikzwidth*0.7)$) rectangle 
+  shading angle=-45] 
+        ($(anchor)+(-0.5*\optikzwidth*0.7,-0.5*\optikzwidth*0.7)$) rectangle 
         ++(0.5*\optikzwidth*1.4,0.5*\optikzwidth*1.4);
-  \draw[rotate around={\optikzangle:(\@coordinates)}, thick] 
-        ($(\@coordinates)+(-0.5*\optikzwidth*0.7,0.5*\optikzwidth*0.7)$) -- 
-        ($(\@coordinates)+(0.5*\optikzwidth*0.7,-0.5*\optikzwidth*0.7)$);
+  \draw[rotate around={\optikzangle:(anchor)}, thick] 
+        ($(anchor)+(-0.5*\optikzwidth*0.7,0.5*\optikzwidth*0.7)$) -- 
+        ($(anchor)+(0.5*\optikzwidth*0.7,-0.5*\optikzwidth*0.7)$);
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\parabola@draw#1{%
-  \def\@coordinates{#1}
-  \shadedraw[thick, rotate around={\optikzangle+90:(\@coordinates)},
+%   \def\@coordinates{#1}
+  \coordinate (anchor) at (#1);
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle+90:(anchor)}},
   top color=\optikzcolor, 
   bottom color=\optikzcolor, 
   middle color=white, 
-  shading angle=\optikzangle+135] 
-  (\@coordinates) arc (-135:-180:.8*\optikzwidth) -- 
+  shading angle=45] 
+  (anchor) arc (-135:-180:.8*\optikzwidth) -- 
   ++(-.2*\optikzwidth,0) -- 
   ++(0,-1*\optikzwidth) -- 
   ++(1*\optikzwidth,0) -- 
@@ -463,6 +577,19 @@
     \grating@draw{H}
     \BScrystal@draw{I}
     \parabola@draw{J}
+}
+
+\def\drawallcurvedelements@draw#1{%
+    \coordinate (A) at (#1);
+    \coordinate (B) at ($(A)+(1.2,0)$);
+    \coordinate (C) at ($(A)+(2.4,0)$);
+    \coordinate (D) at ($(A)+(3.6,0)$);
+    \coordinate (E) at ($(A)+(4.8,0)$);
+    \curvedmirror@draw{A}
+    \convexmirror@draw{B}
+    \concavelens@draw{C}
+    \convexlens@draw{D}
+    \planconvexlens@draw{E}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -498,24 +625,23 @@
   % Flip label if angle is between 90 and 270
   \pgfmathparse{(abs(\optikzangle) > 90 && abs(\optikzangle) < 270) ? 180 : 0}
   \let\labelangle\pgfmathresult
+  \coordinate (anchor) at (\@coordinates);
   
   \colorlet{objectivecolor}{optikzblue}
   \colorlet{optikzblue}{optikzred}
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},
   top color=objectivecolor, 
   bottom color=objectivecolor,
-  middle color=white,
-  shading angle=\optikzangle] 
-      (\@coordinates) arc (180:165:1.16*\optikzwidth) -- 
-      ($(\@coordinates)+(.3,+0.3*\optikzwidth)$) -- 
+  middle color=white] 
+      (anchor) arc (180:165:1.16*\optikzwidth) -- 
+      ($(anchor)+(.3,+0.3*\optikzwidth)$) -- 
       +(0,-0.6*\optikzwidth) -- 
-      ($(\@coordinates)+(0.0395*\optikzwidth,-0.3*\optikzwidth)$) arc (195:180:1.16*\optikzwidth);
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+      ($(anchor)+(0.0395*\optikzwidth,-0.3*\optikzwidth)$) arc (195:180:1.16*\optikzwidth);
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},
   top color=\optikzcolor,
   bottom color=\optikzcolor,
-  middle color=\optikzcolor!80!white,
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(.15,-.35*\optikzwidth)$) rectangle ++(1.2*\optikzthickness,.7*\optikzwidth);
+  middle color=\optikzcolor!80!white] 
+        ($(anchor)+(.15,-.35*\optikzwidth)$) rectangle ++(1.2*\optikzthickness,.7*\optikzwidth);
   \node[rotate=\optikzangle, shift={(0.6*\optikzthickness+0.15,0)}, rotate=\labelangle] at (\@coordinates){\optikzname};
 }
 
@@ -523,24 +649,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\spectrometer@draw#1{%
-  \def\@coordinates{#1}
+  \coordinate (anchor) at (#1);
   % Flip label if angle is between 90 and 270
   \pgfmathparse{(abs(\optikzangle) > 90 && abs(\optikzangle) < 270) ? 180 : 0}
   \let\labelangle\pgfmathresult
   
   \definecolor{optikzblue}{rgb}{0.5,0.5,0.5}
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},
   top color=black, 
   bottom color=black, 
-  middle color=gray, 
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(0,-.1)$) rectangle ++(0.15,.2);
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  middle color=gray] 
+        ($(anchor)+(0,-.1)$) rectangle ++(0.15,.2);
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},
   top color=\optikzcolor,
   bottom color=\optikzcolor,
-  middle color=white,
-  shading angle=\optikzangle] 
-      ($(\@coordinates)+(+.15,0)$) -- 
+  middle color=white] 
+      ($(anchor)+(+.15,0)$) -- 
       +(0,-.15) -- 
       +(-.15,-.3*\optikzwidth) -- 
       +(-.15,-.4*\optikzwidth) -- 
@@ -549,55 +673,51 @@
       +(-.15,.6*\optikzwidth) --
       +(-.15,.3*\optikzwidth) --
       +(0,.15) -- cycle;
-  \node[rotate=\optikzangle, shift={(0.75*\optikzthickness+0.15,0.1*\optikzwidth)}, rotate=\labelangle] at (\@coordinates){\optikzname};
+  \node[rotate=\optikzangle, shift={(0.75*\optikzthickness+0.15,0.1*\optikzwidth)}, rotate=\labelangle] at (anchor){\optikzname};
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\diode@draw#1{%
-  \def\@coordinates{#1}
+  \coordinate (anchor) at (#1);
   \definecolor{optikzblue}{rgb}{0.5,0.5,0.5}
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},
   top color=black, 
   bottom color=black, 
-  middle color=gray, 
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(0,-.1)$) rectangle ++(0.15,.2);
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},
+  middle color=gray] 
+        ($(anchor)+(0,-.1)$) rectangle ++(0.15,.2);
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},
   top color=\optikzcolor, 
   bottom color=\optikzcolor,
-  middle color=white,
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(.15,-.3*\optikzwidth)$) rectangle ++(.6*\optikzthickness,.6*\optikzwidth);
+  middle color=white] 
+        ($(anchor)+(.15,-.3*\optikzwidth)$) rectangle ++(.6*\optikzthickness,.6*\optikzwidth);
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\laser@draw#1{%
-  \def\@coordinates{#1}
+  \coordinate (anchor) at (#1);
   \colorlet{optikzblue}{optikzyellow}
-  \begin{scope}[rotate around={\optikzangle:(\@coordinates)}]
+  \begin{scope}[transform canvas={rotate around={\optikzangle:(anchor)}}]
   \shadedraw[thick, 
   top color=black, 
   bottom color=black,
-  middle color=gray,
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(1.2*\optikzthickness,-.35*\optikzwidth)$) rectangle ++(-0.1,.7*\optikzwidth);
+  middle color=gray] 
+        ($(anchor)+(1.2*\optikzthickness,-.35*\optikzwidth)$) rectangle ++(-0.1,.7*\optikzwidth);
   \filldraw[thick, fill=black!80!white] 
-        ($(\@coordinates)+(0,-0.45*\optikzwidth)$) rectangle ++(1.2*\optikzthickness-0.1,+0.9*\optikzwidth);
+        ($(anchor)+(0,-0.45*\optikzwidth)$) rectangle ++(1.2*\optikzthickness-0.1,+0.9*\optikzwidth);
   \shadedraw[thick,
   top color=\optikzcolor!30!white,
   bottom color=\optikzcolor!30!white,
-  middle color=\optikzcolor,
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(0,-0.35*\optikzwidth)$) rectangle ++(1.2*\optikzthickness-0.1,0.7*\optikzwidth);
-  \fill ($(\@coordinates)+(0.8*\optikzthickness-0.1,0)$) circle (0.1*\optikzwidth);
-  \draw[thick] ($(\@coordinates)+(0.8*\optikzthickness-0.1,0)$) -- (\@coordinates);
+  middle color=\optikzcolor] 
+        ($(anchor)+(0,-0.35*\optikzwidth)$) rectangle ++(1.2*\optikzthickness-0.1,0.7*\optikzwidth);
+  \fill ($(anchor)+(0.8*\optikzthickness-0.1,0)$) circle (0.1*\optikzwidth);
+  \draw[thick] ($(anchor)+(0.8*\optikzthickness-0.1,0)$) -- (anchor);
   \foreach \optikzangle in {0,30,...,359}{
-  \fill ($(\@coordinates)+(0.8*\optikzthickness-0.1,0)$) -- +(\optikzangle-1:0.2*\optikzwidth) -- +(\optikzangle+1:0.2*\optikzwidth) -- cycle;
-  \fill ($(\@coordinates)+(0.8*\optikzthickness-0.1,0)$) -- +(\optikzangle+15+2:0.3*\optikzwidth) -- +(\optikzangle+15-2:0.3*\optikzwidth) -- cycle;      
+  \fill ($(anchor)+(0.8*\optikzthickness-0.1,0)$) -- +(\optikzangle-1:0.2*\optikzwidth) -- +(\optikzangle+1:0.2*\optikzwidth) -- cycle;
+  \fill ($(anchor)+(0.8*\optikzthickness-0.1,0)$) -- +(\optikzangle+15+2:0.3*\optikzwidth) -- +(\optikzangle+15-2:0.3*\optikzwidth) -- cycle;      
   }
   \end{scope}
 }
@@ -610,45 +730,46 @@
   % Flip label if angle is between 90 and 270
   \pgfmathparse{(\optikzangle < 180 && \optikzangle > 0) ? -90 : 90}
   \let\labelangle\pgfmathresult
+  \coordinate (anchor) at ($(\@coordinates)$);
   
   \definecolor{optikzblue}{rgb}{0.5,0.5,0.5}
-  \shadedraw[thick, rotate around={\optikzangle:(\@coordinates)},top color=\optikzcolor, bottom color=\optikzcolor, middle color=white, shading angle=\optikzangle+90] 
-      ($(\@coordinates)+(+.1,0)$) 
+  \shadedraw[thick, transform canvas={rotate around={\optikzangle:(anchor)}},top color=\optikzcolor, bottom color=\optikzcolor, middle color=white, shading angle=90] 
+      (anchor) 
       -- +(0,-.1*\optikzwidth) 
-      -- +(-.1,-.15*\optikzwidth) 
-      -- +(-.1,-1.1*\optikzwidth+0.6*\optikzshift*\optikzwidth) 
-      -- +(\optikzthickness,-1.1*\optikzwidth+0.6*\optikzshift*\optikzwidth) 
+      -- +(-.05,-.15*\optikzwidth) 
+      -- +(-.05,-1.1*\optikzwidth+0.9*\optikzshift*\optikzwidth) 
+      -- +(\optikzthickness,-1.1*\optikzwidth+0.9*\optikzshift*\optikzwidth) 
       -- +(\optikzthickness,-.15*\optikzwidth) 
-      -- +(\optikzthickness-.1,-.1*\optikzwidth) 
-      -- +(\optikzthickness-.1,.1*\optikzwidth) 
+      -- +(\optikzthickness-.05,-.1*\optikzwidth) 
+      -- +(\optikzthickness-.05,.1*\optikzwidth) 
       -- +(\optikzthickness,.15*\optikzwidth) 
-      -- +(\optikzthickness,1.1*\optikzwidth+0.6*\optikzshift*\optikzwidth) 
-      -- +(-.1,1.1*\optikzwidth+0.6*\optikzshift*\optikzwidth) 
-      -- +(-.1,.15*\optikzwidth) 
+      -- +(\optikzthickness,1.1*\optikzwidth+0.9*\optikzshift*\optikzwidth) 
+      -- +(-.05,1.1*\optikzwidth+0.9*\optikzshift*\optikzwidth) 
+      -- +(-.05,.15*\optikzwidth) 
       -- +(0,.1*\optikzwidth) -- cycle;
-  \node[rotate=\optikzangle, shift={(0.5*\optikzthickness+.05,0.6*\optikzshift*\optikzwidth)}, rotate=\labelangle] at (\@coordinates){\optikzname};
+  \node[rotate=\optikzangle, shift={(0.5*\optikzthickness,0.9*\optikzshift*\optikzwidth)}, rotate=\labelangle] at (\@coordinates){\optikzname};
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def\faradayrotator@draw#1{%
-  \def\@coordinates{#1}
+  \coordinate (anchor) at (#1);
   \colorlet{optikzblue}{optikzred}
-  \begin{scope}[rotate around={\optikzangle:(\@coordinates)}]
+  \begin{scope}[transform canvas={rotate around={\optikzangle:(anchor)}}]
   \shadedraw[thick,top color=gray, 
   bottom color=gray,
   middle color=white,
-  shading angle=\optikzangle,
   rounded corners=2mm*\optikzwidth] 
-        ($(\@coordinates)+(-0.5*\optikzwidth,-0.3*\optikzwidth)$) rectangle +(\optikzwidth,0.6*\optikzwidth);
+        ($(anchor)+(-0.5*\optikzwidth,-0.3*\optikzwidth)$) rectangle +(\optikzwidth,0.6*\optikzwidth);
   \shadedraw[thick,top color=\optikzcolor, 
   bottom color=\optikzcolor, 
-  middle color=\optikzcolor!80!white, 
-  shading angle=\optikzangle] 
-        ($(\@coordinates)+(-0.35*\optikzwidth,-0.35*\optikzwidth)$) rectangle ++(0.7*\optikzwidth,0.7*\optikzwidth);
+  middle color=\optikzcolor!80!white] 
+        ($(anchor)+(-0.35*\optikzwidth,-0.35*\optikzwidth)$) rectangle ++(0.7*\optikzwidth,0.7*\optikzwidth);
   \end{scope}
 }
 
 
 \endinput
+%%
+%% End of file `optikz.sty'.

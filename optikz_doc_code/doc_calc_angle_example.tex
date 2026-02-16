@@ -1,0 +1,27 @@
+\begin{tikzpicture}
+  % Left image
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (2,3);
+  \coordinate (C) at (-2,3);
+  \draw[thick] (A) -- (B) -- (C) -- cycle;
+  
+  \optikzanglethreepoints{A}{B}{C}{\betaangle}
+  \optikzanglethreepoints{C}{A}{B}{\alphaangle}
+  \optikzanglethreepoints{B}{C}{A}{\gammaangle}
+    
+  \mirror[angle=\alphaangle] at (A);
+  \mirror[angle=\betaangle] at (B);
+  \mirror[angle=\gammaangle] at (C);
+  
+  % Right image
+  \coordinate (D) at (5,0);
+  \coordinate (E) at (6,1.5);
+  \coordinate (F) at (7,3);
+  \draw[thick] (D) -- (E) -- (F);
+  
+  \optikzangletwopoints{E}{D}{\angleone}
+  \optikzangletwopoints{D}{E}{\angletwo}
+  \mirror[angle=\angleone] at (D);
+  \convexlens[angle=\angletwo] at (E);
+  \mirror[angle=\angletwo] at (F);
+\end{tikzpicture}

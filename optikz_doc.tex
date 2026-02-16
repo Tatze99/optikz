@@ -1,4 +1,4 @@
-%% optikz version 1.0.0 
+%% optikz version 1.1.0 
 %% Copyright (C) 2025 Martin Beyer
 %
 % This work may be distributed and/or modified under the
@@ -26,6 +26,7 @@
 \usepackage{multicol}
 \usepackage[a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=3cm]{geometry}
 \usepackage{listings}
+\usepackage{amsmath}
 
 % Define custom colors
 \definecolor{codebg}{rgb}{0.97,0.97,0.97}
@@ -76,7 +77,7 @@
   { \Huge The \texttt{Optikz} Package}\\[0.15cm]
   \HRule \\[0.5cm]
   \textsc{\Large Martin Beyer}\\[0.35cm]
-  \textsc{July 28th, 2025,  Version 1.0.0}\\[0.35cm]
+  \textsc{February 16th, 2026,  Version 1.1.0}\\[0.35cm]
   \vfill
   \inputtikz{example_CPA_system}
   \vfill
@@ -146,7 +147,8 @@ where the second argument is the \texttt{rgb} value of the color. If you ever wa
 \end{lstlisting}
 
 \subsection{Rays and beams}
-The drawing of a laser beam is quite simple. We just use the standard TikZ \verb!\draw! function to visualize a ray in our system. We can draw an arrow to indicate the direction of the beam in the following way: 
+In an optical system, we often represent the path of the laser beam with a simple line and a little arrow to indicate the directionality. However, sometimes we also want to indicate the size of the beam as well, especially for beam lines with higher power or optical stretchers with gratings or prisms. 
+\paragraph{Rays} The drawing of a laser ray is quite simple. We just use the standard TikZ \verb!\draw! function to visualize a ray in our system. We can draw an arrow to indicate the direction of the beam in the following way: 
 
 \begin{figure}[htp]
   \centering
@@ -157,25 +159,44 @@ The drawing of a laser beam is quite simple. We just use the standard TikZ \verb
 
 The custom node \verb!\laserdir! has some options we can utilize:
 \begin{lstlisting}
-node[laserdir, pos=0.5, xscale=1, color=black]{\ laserdir}
+node[laserdir, pos=0.5, xscale=1, color=black]{\laserdir}
 \end{lstlisting}
 With \verb!pos! we can change the position along the line segment, \verb!xscale = {-1,1}! changes the direction of the arrow and \verb!color! changes the color of the arrowhead.
 
-Furthermore, we can also draw beams and even indicate color splitting e.g. in an optical stretcher. For a beam we need the anchor points of the mirrors of each segment, their angle and and some optional parameters (beam size, color):
+\paragraph{Beams} Furthermore, we can also draw beams and even indicate wavelength splitting e.g. in an optical stretcher. For a beam we need the anchor points of the mirrors for each segment, their angle and and some optional parameters (beam size, color). Both beam types are defined as follows:
 \begin{lstlisting}
-\drawrainbow[size M1=0.8][size M2=0.8]{pos M1}{pos M2}{angle M1}{angle M2}
-\drawbeam[size M1=0.8][size M2=0.8][fill color=black][border color=black]{pos M1}{pos M2}{angle M1}{angle M2}
+\drawrainbow[width start=0.8,
+             width end=0.8,
+             opacity=0.7]
+            {pos M1}
+            {pos M2}
+            {angle M1}
+            {angle M2}
+            
+\drawbeam[width start=0.8,
+          width end=0.8,
+          fill color=optikzred,
+          draw color=black,
+          opacity=0.7]
+         {pos M1}
+         {pos M2}
+         {angle M1}
+         {angle M2}
 \end{lstlisting}
-Then, we can draw a picture like this:
+Notice that \verb!drawbeam! has two additional optional arguments to specify the fill and border color of the beam. The opacity of the beam is set to \SI{70}{\percent} to visualize overlapping parts. Then, we can draw a picture as shown in figure~\ref{fig:doc_beam}.
 \begin{figure}[htp]
   \centering
   \inputtikz{doc_beam}
   \caption{Drawing of a rainbow beam (left) and normal beam (right).}
+  \label{fig:doc_beam}
 \end{figure}
 \lstinputlisting{optikz_doc_code/doc_beam.tex}
 
+\clearpage
 \subsection{Optical elements}
 Most optical elements follow the same command structure as for a TikZ-Node. The only mandatory argument for each component is it's $(x,y)$ position. This can be passed by stating the coordinate directly or by passing a TikZ-coordinate. The optional arguments are passed with their respective keywords in a square bracket after the command. A complete list of all optional arguments can be found in section~\ref{sec:Optional_arguments}.
+\paragraph{Definition} Every optical elements is defined by this command structure:
+
 \begin{lstlisting}
 % standard command
 \command[<optional paramer>=value] at (x,y); 
@@ -184,7 +205,29 @@ Most optical elements follow the same command structure as for a TikZ-Node. The 
 \coordinate (P1) at (x,y);
 \command[<optional paramer>=value] at (P1); 
 \end{lstlisting}
-A comprehensive list of all optical elements (lenses, splitters, mirrors, gratings) is given in Figure~\ref{fig:optical_elements}. Note that not all optional arguments are shown in this figure, as some elements like \texttt{$\backslash$splitter} have additional arguments like \texttt{shift} or \texttt{wedge} which enable further customization of the element. 
+
+\paragraph{Positioning} Due to the law of reflection, the angle of a reflective optical element is given by the position of the previous and next element. Therefore, we can use \verb!\optikzanglethreepoints! to determine the angle in reference to the input and output beam direction. Furthermore, we can use \verb!\optikzangletwopoints! determine the angle of an optical element which is aligned on a beam bath between two points A and B.
+
+\begin{lstlisting}
+% Calculate the half angle of the triangle ABC 
+\optikzanglethreepoints{A}{B}{C}{\varname}
+
+% Calculate the angle of the vector AB with the x-axis
+\optikzangletwopoints{A}{B}{\varname}
+\end{lstlisting}
+
+
+\begin{figure}[htp]
+  \centering
+  \inputtikz{doc_calc_angle_example}
+  \caption{Left: Automatic calculation of the angle of three mirrors based only on the mirror positions by using \texttt{optikzanglethreepoints}.  Right: Automatic positioning of optical elements along a line defined by two points by using \texttt{optikzangletwopoints}.}
+  \label{fig:doc_calc_angle_example}
+\end{figure}
+
+\lstinputlisting{optikz_doc_code/doc_calc_angle_example.tex}
+
+A comprehensive list of all optical elements (lenses, splitters, mirrors, gratings) is given in Figure~\ref{fig:optical_elements}. Note that not all optional arguments are shown in this figure, as some elements like \texttt{$\backslash$splitter} have additional arguments like \texttt{shift} or \texttt{wedge} which enables further customization of the element. 
+
 \begin{figure}[htp]
   \centering
   \inputtikz{doc_optical_elements}
@@ -192,6 +235,7 @@ A comprehensive list of all optical elements (lenses, splitters, mirrors, gratin
   \label{fig:optical_elements}
   \vspace{-3cm}
 \end{figure}
+
 
 \newpage
 \subsection{Optical devices}
@@ -290,14 +334,37 @@ The \verb!name! (standard value \{ \}) argument does only act on certain devices
 \end{figure}
 
 
-\subsubsection{Wedge}
-The \verb!wedge! (standard value 1) argument does only act on the \verb!\splitter! command. It extends the thickness at the bottom by a scalable factor of the thickness. We can create wedges in the following way:
+\subsubsection{Radius}
+The \verb!radius! (standard value 1.462) argument acts only on optical elements with a curved surface (e.g. curved mirrors and lenses). The numerical value was chosen for backwards compatability. It is given as the radius of a mirror with an opening angle of \SI{40}{\degree} and a width of \SI{1}{\cm}. Note that the radius should always be larger than half of the width, as otherwise the mirror cannot be constructed.
 
+On the bottom of Figure~\ref{fig:doc_radius} we can see that the radius of curvature changes naturally (even if \verb!radius! is not passed as an argument) for larger widths of the mirror. The effective radius is then 
+\begin{align}
+    R_\text{eff} = R_\text{standard} \cdot \texttt{width} = \SI{1.462}{\cm}\cdot \texttt{width},
+\end{align}
+which conserves the $f$-number of the optical element. Using a value of \verb!radius! other than the standard value forces the radius to the specified value and overrides the scaling behaviour.
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_radius}
+    \caption{Demonstration of the \texttt{radius} argument.}
+    \label{fig:doc_radius}
+\end{figure}
+
+\subsubsection{Wedge}
+The \verb!wedge! (standard value 0) argument does only act on the \verb!\splitter! command. It enlarges/reduces the thickness at the top/bottom by a scalable factor of the thickness. The value of \verb!wedge! should lie between $-1\le \texttt{wedge} \le 1$. We can create wedges in the following way:
 
 \begin{figure}[htp]
     \centering
     \inputtikz{doc_wedge}
-    \caption{Demonstration of the \texttt{wedge} argument. In order to obtain mirrored wedges, the \texttt{wedge} argument receives its reciprocate value and the \texttt{thickness} argument the original \texttt{wedg}e value.}
+    \caption{Demonstration of the \texttt{wedge} argument. In order to obtain mirrored wedges, the \texttt{wedge} argument receives its negative value.}
+\end{figure}
+
+\subsubsection{Grating: Grooves}
+The grating possesses two additional arguments to control the number and thickness of the grooves. The \verb!grooves! (standard value 7) argument should be an integer and indicates the number of grooves in a grating. The \verb!groovethickness! argument controls the thickness of the grooves.  
+
+\begin{figure}[htp]
+    \centering
+    \inputtikz{doc_grating_groove}
+    \caption{Demonstration of the \texttt{wedge} argument. In order to obtain mirrored wedges, the \texttt{wedge} argument receives its negative value.}
 \end{figure}
 
 \newpage
