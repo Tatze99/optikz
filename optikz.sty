@@ -61,7 +61,9 @@
 \tikzset{every  text  node  part/.style={align=center}}
 
 % create a laser direction arrow
-\newcommand{\laserdir}{\tikz \draw[-{latex},ultra thick] (-1pt,0) -- (1pt,0);}
+\newcommand{\laserdir}[1][thick]{%
+  \tikz \draw[-{latex}, #1] (-2pt,0) -- (2pt,0);
+}
 
 % Define the laser node style
 \tikzset{laserdir/.style={sloped, midway, allow upside down}}
