@@ -1,4 +1,4 @@
-%% optikz version 1.1.0
+%% optikz version 1.2.0
 %% Copyright (C) 2025 Martin Beyer
 %
 % This work may be distributed and/or modified under the
@@ -61,9 +61,7 @@
 \tikzset{every  text  node  part/.style={align=center}}
 
 % create a laser direction arrow
-\newcommand{\laserdir}[1][thick]{%
-  \tikz \draw[-{latex}, #1] (-2pt,0) -- (2pt,0);
-}
+\newcommand{\laserdir}{\tikz \draw[-{latex},ultra thick] (-1pt,0) -- (1pt,0);}
 
 % Define the laser node style
 \tikzset{laserdir/.style={sloped, midway, allow upside down}}
@@ -194,6 +192,116 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newif\ifoptikzlabels % creates \ifoptikzshowgrid
+
+\pgfkeys{
+  /diffraction/.is family, /diffraction,
+  angle/.initial=0
+  angle/.get=\optikzinputangle, % to get the value from a macro
+  angle/.store in=\optikzinputangle, % to store the value into a macro
+  groove distance/.initial=1000,
+  groove distance/.get=\optikzgroovedistance,
+  groove distance/.store in=\optikzgroovedistance,
+  orders/.initial=2,
+  orders/.get=\optikzdiffractionorders,
+  orders/.store in=\optikzdiffractionorders,
+  size/.initial=1,
+  size/.get=\optikzsize,
+  size/.store in=\optikzsize,
+  show labels/.is if=optikzlabels,
+  show labels/.default=true, % optional default when key is given without value
+  wavelength spacing/.initial=1,
+  wavelength spacing/.get=\optikzwavelengthspacing,
+  wavelength spacing/.store in=\optikzwavelengthspacing,
+}
+
+% Declare an optical element: \DeclareOpticalElement{<name>}{<draw macro>}
+\newcommand{\DeclareDiffractionElement}[2]{%
+  % Define the base macro (e.g., \mirror)
+  \expandafter\def\csname #1\endcsname{%
+    \@ifnextchar[%
+      {\csname #1@opt\endcsname}%
+      {\csname #1@opt\endcsname[]}%
+  }%
+
+  % Optional argument handler: \mirror[...]
+  \expandafter\def\csname #1@opt\endcsname[##1]{%
+    \pgfkeys{/diffraction, angle=0, groove distance=1000, size=1, orders=2, show labels=true, wavelength spacing=1}%
+    \pgfkeys{/diffraction,##1}%
+    \futurelet\@let@token\csname #1@dispatch\endcsname%
+  }%
+
+  % Dispatch to check if 'a' follows
+  \expandafter\def\csname #1@dispatch\endcsname{%
+    \@ifnextchar a{\csname #1@checkat\endcsname}{\mirror@error}%
+  }%
+
+  % Check second character is 't'
+  \expandafter\def\csname #1@checkat\endcsname a{%
+    \@ifnextchar t{\csname #1@eat@at\endcsname}{\mirror@error}%
+  }%
+
+  % Actual command parser: (x,y);
+  \expandafter\def\csname #1@eat@at\endcsname t (##1);{%
+    \csname #2\endcsname{##1}%
+  }%
+}
+
+\DeclareDiffractionElement{diffraction}{diffraction@draw}
+
+\def\diffraction@draw#1{%
+    \coordinate (anchor) at (#1);%
+     % Loop through diffraction orders
+    \foreach \m in {-\optikzdiffractionorders, ..., \optikzdiffractionorders}{
+    \ifnum\m=0\relax\else
+        \pgfmathsetmacro{\spacing}{400+\optikzwavelengthspacing}
+        \foreach \w in {400, \spacing, ..., 700}{
+            \definecolor{currentcol}{wave}{\w}
+        
+            % Calculate the argument for asin
+            \pgfmathsetmacro{\diffArg}{\m * \w / \optikzgroovedistance + sin(\optikzinputangle)}
+            
+            % Check if absolute value is < 1 (valid diffraction)
+            \pgfmathparse{abs(\diffArg) < 1 ? 1 : 0}
+            
+            \ifnum\pgfmathresult=1
+                % Calculate the angle
+                \pgfmathsetmacro{\diffAngle}{90 - asin(\diffArg)}
+                
+                \pgfmathsetmacro{\currentOpacity}{(\m == 1 ? 1.0 : 0.5)}
+                
+                \draw[line width=0.1pt, color=currentcol, opacity=\currentOpacity] 
+                    (anchor) -- +(\diffAngle:2.3*\optikzsize);
+            \fi
+        }
+
+        \pgfmathsetmacro{\diffArg}{\m * 550 / \optikzgroovedistance + sin(\optikzinputangle)}
+        % Check if absolute value is < 1 (valid diffraction)
+        \pgfmathparse{abs(\diffArg) < 1 ? 1 : 0}
+        \ifnum\pgfmathresult=1
+            % Calculate the angle
+            \pgfmathsetmacro{\diffAngle}{90 - asin(\diffArg)}
+            
+            \ifoptikzlabels
+              \node at ($(anchor)+(\diffAngle:2.45*\optikzsize)$){\m};
+            \else
+              % do nothing
+            \fi
+            
+        \fi
+    \fi
+    }
+    \draw[thick, {latex}-] (anchor) -- +(90+\optikzinputangle:2.7*\optikzsize);
+    \draw[thick, -{latex}] (anchor) -- +(90-\optikzinputangle:2.7*\optikzsize)coordinate(output);
+    \ifoptikzlabels
+          \node[above] at (output){$m=0$};
+        \else
+          % do nothing
+        \fi
+    
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Define pgfkeys for mirror options
 \pgfkeys{
@@ -230,7 +338,10 @@
   grooves/.store in=\optikzgrooves,
   groovethickness/.initial=1,
   groovethickness/.get=\optikzgroovethickness,
-  groovethickness/.store in=\optikzgroovethickness
+  groovethickness/.store in=\optikzgroovethickness,
+  blaze angle/.initial=15,
+  blaze angle/.get=\optikzblazeangle,
+  blaze angle/.store in=\optikzblazeangle,
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -265,7 +376,7 @@
   \expandafter\def\csname #1@eat@at\endcsname t (##1);{%
     \csname #2\endcsname{##1}%
     \softresetcolor{optikzblue}% optional, your color reset
-    \pgfkeys{/mirror,angle=0, width=1, color=optikzblue, thickness=1, shift=0, wedge=0, name={}, strip=1, radius=1.462, grooves=7}%
+    \pgfkeys{/mirror,angle=0, width=1, color=optikzblue, thickness=1, shift=0, wedge=0, name={}, strip=1, radius=1.462, grooves=7, groovethickness=1, blaze angle=15}%
   }%
 }
 
@@ -299,6 +410,7 @@
 \DeclareOpticalElement{convexlens}{convexlens@draw}
 \DeclareOpticalElement{planconvexlens}{planconvexlens@draw}
 \DeclareOpticalElement{grating}{grating@draw}
+\DeclareOpticalElement{blazedgrating}{blazedgrating@draw}
 \DeclareOpticalElement{BScrystal}{BScrystal@draw}
 \DeclareOpticalElement{parabola}{parabola@draw}
 \DeclareOpticalElement{camera}{camera@draw}
@@ -380,6 +492,7 @@
     ($(anchor)+(0.3*\optikzthickness,-0.5*\optikzwidth)$)
     rectangle ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
 }
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -512,11 +625,43 @@
         }
         -- ++(0, {0.5 * \optikzwidth / \optikzgrooves})
         -- ++({0.1*\optikzgroovethickness + 0.2*\optikzthickness}, 0) 
-        -- ++(0, {-\optikzwidth}) -- ++({-0.1*\optikzgroovethickness - 0.2*\optikzthickness}, 0) --++(0, {\optikzwidth / (2*\optikzgrooves)});
+        -- ++(0, {-\optikzwidth}) -- cycle;
     \end{scope}
 
   \fill[fill=black,rotate around={\optikzangle:(anchor)}] 
         ($(anchor)+(0.1*\optikzgroovethickness+0.2*\optikzthickness,-0.5*\optikzwidth)$) rectangle 
+        ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\blazedgrating@draw#1{%
+  \def\@coordinates{#1}
+  \coordinate (shift) at ({0.5 * \optikzshift * \optikzwidth * sin(\optikzangle)},
+                            {-0.5 * \optikzshift * \optikzwidth * cos(\optikzangle)});
+  \coordinate (anchor) at ($(\@coordinates)+(shift)$);
+  
+  \pgfmathsetmacro{\groovedistance}{\optikzwidth/\optikzgrooves}
+  \pgfmathsetmacro{\groovethickness}{\groovedistance/2*sin(2*\optikzblazeangle)}
+  \pgfmathsetmacro{\d}{\groovedistance/2-sqrt(\groovedistance^2/4-\groovethickness^2)}
+  
+  \begin{scope}[transform canvas={rotate around={\optikzangle:(anchor)}}]
+    
+  \shadedraw[thick, top color=\optikzcolor, bottom color=\optikzcolor, middle color=white] 
+        ($(anchor)+(0.5*\groovethickness,-0.5*\optikzwidth)$)
+        \foreach \i in {1,...,\optikzgrooves} {
+            -- ++(-\groovethickness, {\groovedistance - \d})
+            -- ++(\groovethickness, \d) 
+        }
+        % -- ++(0, {0.5 * \optikzwidth / \optikzgrooves})
+        -- ++({0.2*\optikzthickness+0.5*\groovethickness}, 0) 
+        -- ++(0, {-\optikzwidth}) -- cycle;
+
+    \end{scope}
+
+  \fill[fill=black,rotate around={\optikzangle:(anchor)}] 
+        ($(anchor)+(\groovethickness+0.2*\optikzthickness,-0.5*\optikzwidth)$) rectangle 
         ++(-0.1*\optikzthickness*\optikzstrip,\optikzwidth);
 }
 
